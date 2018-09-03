@@ -1,0 +1,23 @@
+<resources>
+
+    <!--UX String Set-->
+    <string name="app_name">Movie App</string>
+    <string name="movie_poster">movie_poster</string>
+    <string name="data_loading_please_wait">Movie loading, please wait…</string>
+    <string name="loading">Loading…</string>
+    <string name="poor_connectivity_message">Poor internet connectivity: Please check your connection and pull to refresh.</string>
+    <string name="pls_retry">Please try again.</string>
+    <string name="pull_to_refresh_notif">Pull to refresh this page.</string>
+
+    <!--Preference String Set-->
+    <string name="pref_sort_order_key">sort_order</string>
+    <string name="pref_sort_order_title">Movies Sort Order</string>
+    <string name="pref_popular_movie_label">Most Popular Movies</string>
+    <string name="pref_top_rated_movie_label">Top Rated Movies</string>
+    <string name="pref_popular_movie_value" translatable="false">popular</string>
+    <string name="pref_top_rated_movie_value" translatable="false">top_rated</string>
+
+    <!--Other Strings-->
+    <string name="keyword_settings">Settings</string>
+
+</resources>
