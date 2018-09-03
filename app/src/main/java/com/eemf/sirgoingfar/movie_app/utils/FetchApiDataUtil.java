@@ -23,8 +23,9 @@ import java.util.List;
 
 public class FetchApiDataUtil {
 
-    public static final String URL_POPULAR_MOVIE = "http://api.themoviedb.org/3/movie/popular?api_key=a9e95e05cf8a741263464c8750b70bfc";
-    public static final String URL_TOP_RATED_MOVIE = "http://api.themoviedb.org/3/movie/top_rated?api_key=a9e95e05cf8a741263464c8750b70bfc";
+    private static final String THE_MOVIE_DB_API_KEY = "GET YOURS ON http://www.themoviedb.com TO BE ABLE TO USE THIS APP";
+    public static final String URL_POPULAR_MOVIE = "http://api.themoviedb.org/3/movie/popular?api_key=" + THE_MOVIE_DB_API_KEY;
+    public static final String URL_TOP_RATED_MOVIE = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + THE_MOVIE_DB_API_KEY;
 
     private static MovieAppRoomDatabase mDb;
 
