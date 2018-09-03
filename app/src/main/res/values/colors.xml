@@ -15,5 +15,7 @@
     <!--Other Colors-->
     <color name="colorDivider">#BDBDBD</color>
     <color name="colorBlack">#000000</color>
+    <color name="colorWhite">#ffffff</color>
+    <color name="light_grey">#eeeeee</color>
 
 </resources>

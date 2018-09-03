@@ -1,11 +1,15 @@
 package com.eemf.sirgoingfar.movie_app.activities;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,11 +28,13 @@ import com.eemf.sirgoingfar.movie_app.R;
 import com.eemf.sirgoingfar.movie_app.adapters.MovieRecyclerAdapter;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
+import com.eemf.sirgoingfar.movie_app.models.CatalogViewModel;
 import com.eemf.sirgoingfar.movie_app.utils.FetchApiDataUtil;
 import com.eemf.sirgoingfar.movie_app.utils.NetworkStatus;
 import com.eemf.sirgoingfar.movie_app.utils.PreferenceUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -100,18 +106,16 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     @SuppressLint("StaticFieldLeak")
     private void fetchDataFromDb() {
-        new AsyncTask<Void, Void, ArrayList<MovieEntity>>() {
-            @Override
-            protected ArrayList<MovieEntity> doInBackground(Void... voids) {
-                return (ArrayList<MovieEntity>) mDb.getMovieDao().loadAllMovie();
-            }
 
+        CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this).get(CatalogViewModel.class);
+        model.getAllMovies().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
             @Override
-            protected void onPostExecute(ArrayList<MovieEntity> movieList) {
-                mMovieList = movieList;
+            public void onChanged(@Nullable List<MovieEntity> movieEntities) {
+                mMovieList = (ArrayList<MovieEntity>) movieEntities;
                 setupView();
             }
-        }.execute();
+        });
+
     }
 
     @Override
@@ -161,14 +165,17 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
             else
                 currentDataUrl = FetchApiDataUtil.URL_POPULAR_MOVIE;
 
-            if(TextUtils.equals(currentDataUrl, sortOrderOptionUrl))
+            if (TextUtils.equals(currentDataUrl, sortOrderOptionUrl)) {
+                fetchDataFromDb();
                 return;
+            }
         }
 
         if(PreferenceUtil.getsInstance(this).isNetworkCallInProgress()) {
             Toast.makeText(this, getString(R.string.pls_retry), Toast.LENGTH_SHORT).show();
-            emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
             switchScreen(EMPTY_STATE);
+            emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
+            dataLoadingProgressBar.setVisibility(View.GONE);
             return;
         }
 
@@ -205,6 +212,13 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     private void setupView() {
 
+        //customize Action Bar
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null)
+            actionBar.setTitle(TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
+                    getString(R.string.pref_popular_movie_label) : getString(R.string.pref_top_rated_movie_label));
+
         //RecyclerView
         adapter = new MovieRecyclerAdapter(this, mMovieList);
         movieTileRecyclerView.setHasFixedSize(true);
@@ -215,6 +229,9 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         swipeRefreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+
+                switchScreen(EMPTY_STATE);
+
                 swipeRefreshContainer.setRefreshing(false);
 
                 if (TextUtils.isEmpty(currentSortOrder))

@@ -23,9 +23,10 @@ import java.util.List;
 
 public class FetchApiDataUtil {
 
-    private static final String THE_MOVIE_DB_API_KEY = "GET YOURS ON http://www.themoviedb.com TO BE ABLE TO USE THIS APP";
-    public static final String URL_POPULAR_MOVIE = "http://api.themoviedb.org/3/movie/popular?api_key=" + THE_MOVIE_DB_API_KEY;
-    public static final String URL_TOP_RATED_MOVIE = "http://api.themoviedb.org/3/movie/top_rated?api_key=" + THE_MOVIE_DB_API_KEY;
+    //Todo: Put the API_KEY received from http://www.themoviedb.org in place of {API_KEY} in the two constants below
+    //in order to use this App
+    public static final String URL_POPULAR_MOVIE = "http://api.themoviedb.org/3/movie/popular?api_key={API_KEY}";
+    public static final String URL_TOP_RATED_MOVIE = "http://api.themoviedb.org/3/movie/top_rated?api_key={API_KEY}";
 
     private static MovieAppRoomDatabase mDb;
 
@@ -67,7 +68,7 @@ public class FetchApiDataUtil {
         mDb = MovieAppRoomDatabase.getInstance(context);
 
         //prepare database first
-        clearDatabase();
+        clearDatabase(context);
 
         //populate the Database iteratively
         for(MovieContent movieContent : movieList) {
@@ -92,9 +93,9 @@ public class FetchApiDataUtil {
                 );
     }
 
-    private static void clearDatabase() {
+    private static void clearDatabase(Context context) {
 
-        List<MovieEntity> allMovie = mDb.getMovieDao().loadAllMovie();
+        List<MovieEntity> allMovie = mDb.getMovieDao().loadAllMovieUnobserved();
 
         //clear the DB if the database was earlier populated
         if(!allMovie.isEmpty())

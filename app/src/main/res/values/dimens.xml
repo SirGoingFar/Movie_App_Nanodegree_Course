@@ -9,4 +9,12 @@
     <dimen name="dimen_30dp">30dp</dimen>
     <dimen name="dimen_20dp">20dp</dimen>
     <dimen name="text_20sp">20sp</dimen>
+    <dimen name="dimen_10dp">10dp</dimen>
+    <dimen name="text_30sp">30sp</dimen>
+    <dimen name="text_15sp">15sp</dimen>
+    <dimen name="dimen_1dp">1dp</dimen>
+    <dimen name="text_25sp">25sp</dimen>
+    <dimen name="dimen_40dp">40dp</dimen>
+    <dimen name="dimen_8dp">8dp</dimen>
+    <dimen name="dimen_15dp">15dp</dimen>
 </resources>
