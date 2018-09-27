@@ -23,8 +23,8 @@ public class ApiDataFetchIntentService extends IntentService {
         Context context = this.getApplicationContext();
 
         String sortOrderUrl =
-                PreferenceUtil.getsInstance(context).getDatabaseHasTopRatedMovieData() ?
-                        FetchApiDataUtil.URL_TOP_RATED_MOVIE : FetchApiDataUtil.URL_POPULAR_MOVIE;
+                PreferenceUtil.getsInstance(context).doesDatabaseHaveTopRatedMovieData() ?
+                        FetchApiDataUtil.TYPE_TOP_RATED_MOVIE : FetchApiDataUtil.TYPE_POPULAR_MOVIE;
 
         FetchApiDataUtil.execute(context, sortOrderUrl);
     }

@@ -27,9 +27,8 @@ public class MovieRecyclerAdapter extends RecyclerView.Adapter<MovieRecyclerAdap
     private Context mContext;
     private ArrayList<MovieEntity> mMovieList;
 
-    public MovieRecyclerAdapter(Context mContext, ArrayList<MovieEntity> mMovieList) {
+    public MovieRecyclerAdapter(Context mContext) {
         this.mContext = mContext;
-        this.mMovieList = mMovieList;
     }
 
     @NonNull

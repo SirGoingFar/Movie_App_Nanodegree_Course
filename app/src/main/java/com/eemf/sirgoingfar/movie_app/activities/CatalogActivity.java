@@ -26,7 +26,6 @@ import android.widget.Toast;
 
 import com.eemf.sirgoingfar.movie_app.R;
 import com.eemf.sirgoingfar.movie_app.adapters.MovieRecyclerAdapter;
-import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
 import com.eemf.sirgoingfar.movie_app.models.CatalogViewModel;
 import com.eemf.sirgoingfar.movie_app.utils.FetchApiDataUtil;
@@ -64,13 +63,11 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     @BindView(R.id.pb_data_loader)
     ProgressBar dataLoadingProgressBar;
 
-    //Other Variables
-    private MovieRecyclerAdapter adapter;
-    private ArrayList<MovieEntity> mMovieList = new ArrayList<>();
     private PreferenceUtil prefs;
     private SharedPreferences sharedPreference;
     private String currentSortOrder;
-    private MovieAppRoomDatabase mDb;
+    private ActionBar actionBar;
+    private MovieRecyclerAdapter adapter;
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -80,42 +77,26 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         ButterKnife.bind(this);
 
         //initialize the appropriate variables
-        mDb = MovieAppRoomDatabase.getInstance(this);
         prefs = PreferenceUtil.getsInstance(this);
         sharedPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
+        //set up views
+        setupView();
+
         //mine the 'sort_order'
-        currentSortOrder = sharedPreference.getString(getString(R.string.pref_sort_order_key), "");
+        currentSortOrder = sharedPreference.getString(getString(R.string.pref_sort_order_key), FetchApiDataUtil.TYPE_POPULAR_MOVIE);
 
         //populate the screen
-        if (PreferenceUtil.getsInstance(this).getPrefApiDataPulledSuccessfully()) {
-            if (doesCurrentDataMatchUserSortOrder())
+        if (prefs.isApiDataPulledSuccessfully()) {
+            if (doesCurrentMovieDataMatchUserSortOrder())
                 fetchDataFromDb();
             else
-                fetchMovieApiData(TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
-            FetchApiDataUtil.URL_POPULAR_MOVIE : FetchApiDataUtil.URL_TOP_RATED_MOVIE);
+                fetchMovieApiData();
         } else
-            fetchMovieApiData(
-                    TextUtils.equals(currentSortOrder, getString(R.string.pref_top_rated_movie_value)) ?
-                            FetchApiDataUtil.URL_TOP_RATED_MOVIE : FetchApiDataUtil.URL_POPULAR_MOVIE
-            );
+            fetchMovieApiData();
 
 
         sharedPreference.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void fetchDataFromDb() {
-
-        CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this).get(CatalogViewModel.class);
-        model.getAllMovies().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
-            @Override
-            public void onChanged(@Nullable List<MovieEntity> movieEntities) {
-                mMovieList = (ArrayList<MovieEntity>) movieEntities;
-                setupView();
-            }
-        });
-
     }
 
     @Override
@@ -138,13 +119,13 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
         if (key.equals(getString(R.string.pref_sort_order_key))) {
 
-            String value = sharedPreferences.getString(key, "");
+            String value = sharedPreferences.getString(key, FetchApiDataUtil.TYPE_POPULAR_MOVIE);
 
-            if (TextUtils.equals(value, getString(R.string.pref_popular_movie_value)))
-                fetchMovieApiData(FetchApiDataUtil.URL_POPULAR_MOVIE);
+            if (TextUtils.equals(value, FetchApiDataUtil.TYPE_POPULAR_MOVIE))
+                fetchMovieApiData(FetchApiDataUtil.TYPE_POPULAR_MOVIE);
 
-            else if (TextUtils.equals(value, getString(R.string.pref_top_rated_movie_value)))
-                fetchMovieApiData(FetchApiDataUtil.URL_TOP_RATED_MOVIE);
+            else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE))
+                fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
         }
     }
 
@@ -152,26 +133,46 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     protected void onDestroy() {
         super.onDestroy();
         sharedPreference.unregisterOnSharedPreferenceChangeListener(this);
+        prefs.setIsNetworkCallInProgress(false);
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void fetchMovieApiData(final String sortOrderOptionUrl) {
+    private void fetchDataFromDb() {
+
+        CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this).get(CatalogViewModel.class);
+        model.getAllMovies().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntity> movieEntities) {
+                adapter.setmMovieList((ArrayList<MovieEntity>) movieEntities);
+                switchScreen(FILLED_STATE);
+            }
+        });
+
+    }
+
+    private void fetchMovieApiData() {
+        fetchMovieApiData(TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
+                FetchApiDataUtil.TYPE_POPULAR_MOVIE : FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void fetchMovieApiData(final String movieSortOrder) {
 
         //check if the data to be fetched is the current one in the Db
-        if(prefs.getPrefApiDataPulledSuccessfully()){
-            String currentDataUrl;
-            if(prefs.getDatabaseHasTopRatedMovieData())
-                currentDataUrl = FetchApiDataUtil.URL_TOP_RATED_MOVIE;
-            else
-                currentDataUrl = FetchApiDataUtil.URL_POPULAR_MOVIE;
+        if (prefs.isApiDataPulledSuccessfully()) {
 
-            if (TextUtils.equals(currentDataUrl, sortOrderOptionUrl)) {
+            if (prefs.doesDatabaseHaveTopRatedMovieData())
+                currentSortOrder = FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
+            else
+                currentSortOrder = FetchApiDataUtil.TYPE_POPULAR_MOVIE;
+
+            if (TextUtils.equals(currentSortOrder, movieSortOrder)) {
                 fetchDataFromDb();
                 return;
             }
         }
 
-        if(PreferenceUtil.getsInstance(this).isNetworkCallInProgress()) {
+        if (prefs.isNetworkCallInProgress()) {
             Toast.makeText(this, getString(R.string.pls_retry), Toast.LENGTH_SHORT).show();
             switchScreen(EMPTY_STATE);
             emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
@@ -193,7 +194,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
             @Override
             protected Void doInBackground(Void... voids) {
-                FetchApiDataUtil.execute(CatalogActivity.this, sortOrderOptionUrl);
+                FetchApiDataUtil.execute(CatalogActivity.this, movieSortOrder);
                 return null;
             }
 
@@ -212,16 +213,11 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     private void setupView() {
 
-        //customize Action Bar
-        ActionBar actionBar = getSupportActionBar();
-
-        if (actionBar != null)
-            actionBar.setTitle(TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
-                    getString(R.string.pref_popular_movie_label) : getString(R.string.pref_top_rated_movie_label));
+        //Initialize Action Bar
+        actionBar = getSupportActionBar();
 
         //RecyclerView
-        adapter = new MovieRecyclerAdapter(this, mMovieList);
-        movieTileRecyclerView.setHasFixedSize(true);
+        adapter = new MovieRecyclerAdapter(this);
         movieTileRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         movieTileRecyclerView.setAdapter(adapter);
 
@@ -234,21 +230,28 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
                 swipeRefreshContainer.setRefreshing(false);
 
-                if (TextUtils.isEmpty(currentSortOrder))
-                    return;
-
+                //fetch currentSortOrder API data
                 fetchMovieApiData(
-                        TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
-                                FetchApiDataUtil.URL_POPULAR_MOVIE : FetchApiDataUtil.URL_TOP_RATED_MOVIE
-                );
+                        sharedPreference.getString(getString(R.string.pref_sort_order_key),
+                                FetchApiDataUtil.TYPE_POPULAR_MOVIE
+                        ));
             }
         });
-
-        //switch screen
-        switchScreen(FILLED_STATE);
     }
 
     private void switchScreen(int screenToShow) {
+
+        String actionBarTitle;
+
+        if (actionBar != null) {
+
+            if (prefs.doesDatabaseHaveTopRatedMovieData())
+                actionBarTitle = getString(R.string.pref_top_rated_movie_label);
+            else
+                actionBarTitle = getString(R.string.pref_popular_movie_label);
+
+            actionBar.setTitle(actionBarTitle);
+        }
 
         if (screenToShow == EMPTY_STATE) {
             emptyStateContainer.setVisibility(View.VISIBLE);
@@ -260,23 +263,24 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     }
 
-    private boolean doesCurrentDataMatchUserSortOrder(){
-        if(prefs.getPrefApiDataPulledSuccessfully()){
+    private boolean doesCurrentMovieDataMatchUserSortOrder() {
 
-            String currentDataUrl;
-            String currentSortOrderUrl;
+        if (prefs.isApiDataPulledSuccessfully()) {
 
-            //get the URL of the data in the database
-            if(prefs.getDatabaseHasTopRatedMovieData())
-                currentDataUrl = FetchApiDataUtil.URL_TOP_RATED_MOVIE;
+            String currentMovieType;
+
+            //get the label of the data in the database
+            if (prefs.doesDatabaseHaveTopRatedMovieData())
+                currentMovieType = FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
             else
-                currentDataUrl = FetchApiDataUtil.URL_POPULAR_MOVIE;
+                currentMovieType = FetchApiDataUtil.TYPE_POPULAR_MOVIE;
 
-            //get the URL of the current sort order
-            currentSortOrderUrl = TextUtils.equals(sharedPreference.getString(getString(R.string.pref_sort_order_key), ""),getString(R.string.pref_popular_movie_value)) ?
-                    FetchApiDataUtil.URL_POPULAR_MOVIE : FetchApiDataUtil.URL_TOP_RATED_MOVIE;
+            //get the value of the current sort order
+            currentSortOrder = TextUtils.equals(sharedPreference.getString(getString(R.string.pref_sort_order_key),
+                    FetchApiDataUtil.TYPE_POPULAR_MOVIE), getString(R.string.pref_popular_movie_value)) ?
+                    FetchApiDataUtil.TYPE_POPULAR_MOVIE : FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
 
-            return TextUtils.equals(currentDataUrl, currentSortOrderUrl);
+            return TextUtils.equals(currentMovieType, currentSortOrder);
         }
         else
             return false;

@@ -4,17 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.eemf.sirgoingfar.movie_app.R;
-
 public class PreferenceUtil {
 
     //Constants
     public static final String PREF_API_DATA_PULLED_SUCCESSFULLY = "pref_api_data_pulled_successfully";
-    public static final String PREF_DATABASE_HAS_TOP_RATED_MOVIE_DATA = "pref_database_has_popular_movie_data";
+    public static final String PREF_DATABASE_HAS_TOP_RATED_MOVIE_DATA = "pref_database_has_top_rated_movie_data";
     private static final String PREF_NETWORK_CALL_IS_ON = "pref_network_call_is_on";
 
-    //Other Variables
-    private Context mContext;
     private SharedPreferences mPref;
     private static PreferenceUtil sInstance;
 
@@ -27,7 +23,6 @@ public class PreferenceUtil {
 
     private PreferenceUtil(Context context) {
         mPref = PreferenceManager.getDefaultSharedPreferences(context);
-        mContext = context;
     }
 
     public void setPrefApiDataPulledSuccessfully(Boolean isApiDataPulledAtAppFirstLaunch){
@@ -35,16 +30,16 @@ public class PreferenceUtil {
                 .apply();
     }
 
-    public boolean getPrefApiDataPulledSuccessfully(){
+    public boolean isApiDataPulledSuccessfully() {
         return mPref.getBoolean(PREF_API_DATA_PULLED_SUCCESSFULLY, false);
     }
 
-    public void setDatabaseHasPopularMovieData(boolean databaseHasTopRatedMovieData){
+    public void setDatabaseHasTopRatedMovieData(boolean databaseHasTopRatedMovieData) {
         getEditor().putBoolean(PREF_DATABASE_HAS_TOP_RATED_MOVIE_DATA, databaseHasTopRatedMovieData)
                 .apply();
     }
 
-    public boolean getDatabaseHasTopRatedMovieData(){
+    public boolean doesDatabaseHaveTopRatedMovieData() {
         return mPref.getBoolean(PREF_DATABASE_HAS_TOP_RATED_MOVIE_DATA, false);
     }
 
