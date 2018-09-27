@@ -8,6 +8,8 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +24,6 @@ import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.eemf.sirgoingfar.movie_app.R;
 import com.eemf.sirgoingfar.movie_app.adapters.MovieRecyclerAdapter;
@@ -94,8 +95,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                 fetchMovieApiData();
         } else
             fetchMovieApiData();
-
-
+        
         sharedPreference.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -173,7 +173,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         }
 
         if (prefs.isNetworkCallInProgress()) {
-            Toast.makeText(this, getString(R.string.pls_retry), Toast.LENGTH_SHORT).show();
+            showSnackbar(getString(R.string.pls_retry), getString(R.string.keyword_retry), refreshAction());
             switchScreen(EMPTY_STATE);
             emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
             dataLoadingProgressBar.setVisibility(View.GONE);
@@ -285,4 +285,31 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         else
             return false;
     }
+
+    private Runnable refreshAction() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                //fetch currentSortOrder API data
+                fetchMovieApiData(
+                        sharedPreference.getString(getString(R.string.pref_sort_order_key),
+                                FetchApiDataUtil.TYPE_POPULAR_MOVIE
+                        ));
+            }
+        };
+    }
+
+    private void showSnackbar(String message, String actionLabel, final Runnable actionOperation) {
+
+        Snackbar.make(movieTileRecyclerView, message, Snackbar.LENGTH_LONG)
+                .setAction(actionLabel, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        actionOperation.run();
+                    }
+                })
+                .setActionTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+                .show();
+    }
+
 }
