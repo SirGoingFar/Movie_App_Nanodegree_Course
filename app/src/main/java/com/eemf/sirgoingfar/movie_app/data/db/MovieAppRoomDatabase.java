@@ -25,5 +25,5 @@ public abstract class MovieAppRoomDatabase extends RoomDatabase {
         return sInstance;
     }
 
-    public abstract AllDao getDao();
+    public abstract AllTableDao getDao();
 }

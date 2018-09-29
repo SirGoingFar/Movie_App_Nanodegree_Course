@@ -10,7 +10,7 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 @Dao
-public interface AllDao {
+public interface AllTableDao {
 
     //Movie Type
     @Query("SELECT * FROM movieEntity WHERE movie_type =:movieType")
@@ -47,5 +47,32 @@ public interface AllDao {
 
     @Insert
     void insertTrailerObject(MovieTrailerEntity trailerObject);
+
+    //Review
+    @Query("SELECT * FROM movieReviewEntity WHERE movie_id = :movieId")
+    List<MovieReviewEntity> getAllReviewByMovieId(int movieId);
+
+    @Query("DELETE FROM movieReviewEntity WHERE movie_id = :movieId")
+    void deleteAllReviewByMovieId(int movieId);
+
+
+    //Favorite Movie
+    @Query("SELECT * FROM popularMovieEntity")
+    List<PopularMovieEntity> loadAllPopularMovieUnobserved();
+
+    @Query("SELECT * FROM popularMovieEntity")
+    LiveData<List<PopularMovieEntity>> loadAllPopularMovie();
+
+    @Query("SELECT * FROM popularMovieEntity  WHERE id=:id")
+    LiveData<PopularMovieEntity> loadPopularMovieById(int id);
+
+    @Query("DELETE FROM popularMovieEntity")
+    void deleteAllPopularMovie();
+
+    @Insert
+    void insertMovie(PopularMovieEntity popularMovieEntity);
+
+    @Update
+    void updateMovie(PopularMovieEntity movieEntity);
 
 }
