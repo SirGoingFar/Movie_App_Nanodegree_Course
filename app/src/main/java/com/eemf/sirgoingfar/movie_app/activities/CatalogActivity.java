@@ -36,11 +36,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class CatalogActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_EMPTY;
+import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_FILLED;
 
-    //Constants
-    private final int EMPTY_STATE = 0;
-    private final int FILLED_STATE = 1;
+public class CatalogActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     //Views
     @BindView(R.id.sr_layout)
@@ -134,16 +133,6 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                     fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
 
             }
-
-
-            /*if (TextUtils.equals(value, FetchApiDataUtil.TYPE_POPULAR_MOVIE)) {
-
-                    fetchMovieApiData(FetchApiDataUtil.TYPE_POPULAR_MOVIE);
-            } else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE)) {
-
-                    fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
-
-            }*/
         }
     }
 
@@ -161,18 +150,25 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
             actionBar.setTitle(TextUtils.equals(movieType, FetchApiDataUtil.TYPE_POPULAR_MOVIE) ?
                     getString(R.string.pref_popular_movie_label) : getString(R.string.pref_top_rated_movie_label));
         }
-
-        //fetch data
+        /*CatalogActivityViewModelFactory factory = new CatalogActivityViewModelFactory(mDb, movieType);
+        final CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this, factory).get(CatalogViewModel.class);
+        model.getAllMoviesType().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
+            @Override
+            public void onChanged(@Nullable List<MovieEntity> movieEntities) {
+                adapter.setmMovieList((ArrayList<MovieEntity>) movieEntities);
+                switchScreen(STATE_FILLED);
+            }
+        });*/
         new AsyncTask<Void, Void, List<MovieEntity>>() {
             @Override
             protected List<MovieEntity> doInBackground(Void... voids) {
-                return mDb.getMovieDao().loadAllMovieTypeUnobserved(movieType);
+                return mDb.getDao().loadAllMovieTypeUnobserved(movieType);
             }
 
             @Override
             protected void onPostExecute(List<MovieEntity> movieEntities) {
                 adapter.setmMovieList(movieEntities);
-                switchScreen(FILLED_STATE);
+                switchScreen(STATE_FILLED);
             }
         }.execute();
 
@@ -202,7 +198,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
         if (prefs.isNetworkCallInProgress()) {
             showSnackbar(getString(R.string.pls_retry), getString(R.string.keyword_retry), refreshAction());
-            switchScreen(EMPTY_STATE);
+            switchScreen(STATE_EMPTY);
             emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
             dataLoadingProgressBar.setVisibility(View.GONE);
             return;
@@ -216,13 +212,13 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         }
 
         //switch screen
-        switchScreen(EMPTY_STATE);
+        switchScreen(STATE_EMPTY);
 
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                FetchApiDataUtil.execute(CatalogActivity.this, movieSortOrder);
+                FetchApiDataUtil.execute(CatalogActivity.this, FetchApiDataUtil.ACTION_FETCH_MOVIE_DATA, movieSortOrder);
                 return null;
             }
 
@@ -254,7 +250,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
             @Override
             public void onRefresh() {
 
-                switchScreen(EMPTY_STATE);
+                switchScreen(STATE_EMPTY);
 
                 swipeRefreshContainer.setRefreshing(false);
 
@@ -269,7 +265,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     private void switchScreen(int screenToShow) {
 
-        if (screenToShow == EMPTY_STATE) {
+        if (screenToShow == STATE_EMPTY) {
             emptyStateContainer.setVisibility(View.VISIBLE);
             filledStateContainer.setVisibility(View.GONE);
         } else {

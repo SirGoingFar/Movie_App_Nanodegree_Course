@@ -23,5 +23,8 @@
     <string name="user_rating">USER RATING</string>
     <string name="release_date">(<xliff:g id="release_date" example="2018/12/12">%s</xliff:g>)</string>
     <string name="keyword_retry">RETRY</string>
+    <string name="movie_title_holder">SNAKE IN THE EAGLE SHADOW</string>
+    <string name="trailer_1">Trailer 1</string>
+    <string name="trailer_unavaliable">Trailer unavailable</string>
 
 </resources>
