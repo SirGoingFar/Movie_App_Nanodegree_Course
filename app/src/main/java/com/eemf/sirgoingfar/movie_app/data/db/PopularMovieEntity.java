@@ -5,8 +5,8 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity(tableName = "movieEntity")
-public class MovieEntity {
+@Entity(tableName = "popularMovieEntity")
+public class PopularMovieEntity {
 
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -35,8 +35,8 @@ public class MovieEntity {
     private int favorite;
 
     @Ignore
-    public MovieEntity(int movieId, String originalTitle, String imagePath,
-                       String overview, String releaseDate, double userRating, String movieType) {
+    public PopularMovieEntity(int movieId, String originalTitle, String imagePath,
+                              String overview, String releaseDate, double userRating, String movieType) {
         this.movieId = movieId;
         this.originalTitle = originalTitle;
         this.imagePath = imagePath;
@@ -46,8 +46,8 @@ public class MovieEntity {
         this.movieType = movieType;
     }
 
-    public MovieEntity(int id, int movieId, String originalTitle, String imagePath,
-                       String overview, String releaseDate, double userRating, String movieType) {
+    public PopularMovieEntity(int id, int movieId, String originalTitle, String imagePath,
+                              String overview, String releaseDate, double userRating, String movieType) {
         this.id = id;
         this.movieId = movieId;
         this.originalTitle = originalTitle;

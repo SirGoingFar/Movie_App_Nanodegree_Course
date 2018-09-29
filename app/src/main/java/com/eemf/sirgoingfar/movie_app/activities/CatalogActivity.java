@@ -1,13 +1,10 @@
 package com.eemf.sirgoingfar.movie_app.activities;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -17,6 +14,7 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,13 +25,12 @@ import android.widget.TextView;
 
 import com.eemf.sirgoingfar.movie_app.R;
 import com.eemf.sirgoingfar.movie_app.adapters.MovieRecyclerAdapter;
+import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
-import com.eemf.sirgoingfar.movie_app.models.CatalogViewModel;
 import com.eemf.sirgoingfar.movie_app.utils.FetchApiDataUtil;
 import com.eemf.sirgoingfar.movie_app.utils.NetworkStatus;
 import com.eemf.sirgoingfar.movie_app.utils.PreferenceUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -64,6 +61,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     @BindView(R.id.pb_data_loader)
     ProgressBar dataLoadingProgressBar;
 
+    private MovieAppRoomDatabase mDb;
     private PreferenceUtil prefs;
     private SharedPreferences sharedPreference;
     private String currentSortOrder;
@@ -78,6 +76,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         ButterKnife.bind(this);
 
         //initialize the appropriate variables
+        mDb = MovieAppRoomDatabase.getInstance(this);
         prefs = PreferenceUtil.getsInstance(this);
         sharedPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -90,12 +89,12 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         //populate the screen
         if (prefs.isApiDataPulledSuccessfully()) {
             if (doesCurrentMovieDataMatchUserSortOrder())
-                fetchDataFromDb();
+                fetchDataFromDb(currentSortOrder);
             else
-                fetchMovieApiData();
+                fetchMovieApiData(currentSortOrder);
         } else
             fetchMovieApiData();
-        
+
         sharedPreference.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -121,11 +120,30 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
             String value = sharedPreferences.getString(key, FetchApiDataUtil.TYPE_POPULAR_MOVIE);
 
-            if (TextUtils.equals(value, FetchApiDataUtil.TYPE_POPULAR_MOVIE))
-                fetchMovieApiData(FetchApiDataUtil.TYPE_POPULAR_MOVIE);
+            if (TextUtils.equals(value, FetchApiDataUtil.TYPE_POPULAR_MOVIE)) {
 
-            else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE))
-                fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
+                if (prefs.isPopularMovieApiDataFetchedSuccessfully())
+                    fetchDataFromDb(value);
+                else
+                    fetchMovieApiData(FetchApiDataUtil.TYPE_POPULAR_MOVIE);
+            } else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE)) {
+
+                if (prefs.isTopRatedMovieApiDataFetchedSuccessfully())
+                    fetchDataFromDb(value);
+                else
+                    fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
+
+            }
+
+
+            /*if (TextUtils.equals(value, FetchApiDataUtil.TYPE_POPULAR_MOVIE)) {
+
+                    fetchMovieApiData(FetchApiDataUtil.TYPE_POPULAR_MOVIE);
+            } else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE)) {
+
+                    fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
+
+            }*/
         }
     }
 
@@ -137,16 +155,26 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void fetchDataFromDb() {
+    private void fetchDataFromDb(final String movieType) {
 
-        CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this).get(CatalogViewModel.class);
-        model.getAllMovies().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
+        if (actionBar != null) {
+            actionBar.setTitle(TextUtils.equals(movieType, FetchApiDataUtil.TYPE_POPULAR_MOVIE) ?
+                    getString(R.string.pref_popular_movie_label) : getString(R.string.pref_top_rated_movie_label));
+        }
+
+        //fetch data
+        new AsyncTask<Void, Void, List<MovieEntity>>() {
             @Override
-            public void onChanged(@Nullable List<MovieEntity> movieEntities) {
-                adapter.setmMovieList((ArrayList<MovieEntity>) movieEntities);
+            protected List<MovieEntity> doInBackground(Void... voids) {
+                return mDb.getMovieDao().loadAllMovieTypeUnobserved(movieType);
+            }
+
+            @Override
+            protected void onPostExecute(List<MovieEntity> movieEntities) {
+                adapter.setmMovieList(movieEntities);
                 switchScreen(FILLED_STATE);
             }
-        });
+        }.execute();
 
     }
 
@@ -167,7 +195,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                 currentSortOrder = FetchApiDataUtil.TYPE_POPULAR_MOVIE;
 
             if (TextUtils.equals(currentSortOrder, movieSortOrder)) {
-                fetchDataFromDb();
+                fetchDataFromDb(currentSortOrder);
                 return;
             }
         }
@@ -200,7 +228,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
             @Override
             protected void onPostExecute(Void aVoid) {
-                fetchDataFromDb();
+                fetchDataFromDb(movieSortOrder);
             }
         }.execute();
 
@@ -218,7 +246,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
         //RecyclerView
         adapter = new MovieRecyclerAdapter(this);
-        movieTileRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        movieTileRecyclerView.setLayoutManager(new GridLayoutManager(this, getMaxSpanCount()));
         movieTileRecyclerView.setAdapter(adapter);
 
         //Swipe Refresh Layout
@@ -240,18 +268,6 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     }
 
     private void switchScreen(int screenToShow) {
-
-        String actionBarTitle;
-
-        if (actionBar != null) {
-
-            if (prefs.doesDatabaseHaveTopRatedMovieData())
-                actionBarTitle = getString(R.string.pref_top_rated_movie_label);
-            else
-                actionBarTitle = getString(R.string.pref_popular_movie_label);
-
-            actionBar.setTitle(actionBarTitle);
-        }
 
         if (screenToShow == EMPTY_STATE) {
             emptyStateContainer.setVisibility(View.VISIBLE);
@@ -281,8 +297,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                     FetchApiDataUtil.TYPE_POPULAR_MOVIE : FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
 
             return TextUtils.equals(currentMovieType, currentSortOrder);
-        }
-        else
+        } else
             return false;
     }
 
@@ -310,6 +325,22 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                 })
                 .setActionTextColor(ContextCompat.getColor(this, R.color.colorWhite))
                 .show();
+    }
+
+    private int getMaxSpanCount() {
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+
+        int SCALING_FACTOR = 200;
+
+        int noOfColumns = (int) (dpWidth / SCALING_FACTOR);
+
+        if (noOfColumns < 2)
+            noOfColumns = 2;
+
+        return noOfColumns;
     }
 
 }

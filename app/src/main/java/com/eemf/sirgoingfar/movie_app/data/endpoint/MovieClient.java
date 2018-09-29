@@ -8,6 +8,6 @@ import retrofit2.http.Path;
 
 public interface MovieClient {
 
-    @GET("3/movie/{movie_type}?api_key=a9e95e05cf8a741263464c8750b70bfc")
+    @GET("3/movie/{movie_type}?api_key={api_key}")
     Call<ApiData> fetchMovieData(@Path("movie_type") String movieType);
 }
