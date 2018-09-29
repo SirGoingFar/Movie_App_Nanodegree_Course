@@ -1,6 +1,7 @@
 package com.eemf.sirgoingfar.movie_app.data.db;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
 import java.util.List;
@@ -13,5 +14,8 @@ public interface MovieTrailerDao {
 
     @Query("DELETE FROM movieTrailerEntity WHERE movie_id = :movieId")
     void deleteAllTrailerByMovieId(int movieId);
+
+    @Insert
+    void insertTrailerObject(MovieTrailerEntity trailerObject);
 
 }

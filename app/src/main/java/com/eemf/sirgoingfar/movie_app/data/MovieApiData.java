@@ -1,9 +1,10 @@
 package com.eemf.sirgoingfar.movie_app.data;
 
-import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
-public class ApiData{
+import java.util.List;
+
+public class MovieApiData {
 
 	@SerializedName("page")
 	private int page;
