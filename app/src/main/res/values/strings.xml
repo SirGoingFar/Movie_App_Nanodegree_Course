@@ -22,5 +22,6 @@
     <string name="keyword_overview">OVERVIEW</string>
     <string name="user_rating">USER RATING</string>
     <string name="release_date">(<xliff:g id="release_date" example="2018/12/12">%s</xliff:g>)</string>
+    <string name="keyword_retry">RETRY</string>
 
 </resources>

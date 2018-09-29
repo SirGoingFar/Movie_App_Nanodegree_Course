@@ -16,7 +16,7 @@ import com.eemf.sirgoingfar.movie_app.activities.MovieDetailActivity;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
 import com.eemf.sirgoingfar.movie_app.utils.Constants;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 public class MovieRecyclerAdapter extends RecyclerView.Adapter<MovieRecyclerAdapter.Holder> {
 
     private Context mContext;
-    private ArrayList<MovieEntity> mMovieList;
+    private List<MovieEntity> mMovieList;
 
     public MovieRecyclerAdapter(Context mContext) {
         this.mContext = mContext;
@@ -78,7 +78,7 @@ public class MovieRecyclerAdapter extends RecyclerView.Adapter<MovieRecyclerAdap
         }
     }
 
-    public void setmMovieList(ArrayList<MovieEntity> mMovieList){
+    public void setmMovieList(List<MovieEntity> mMovieList) {
         this.mMovieList = mMovieList;
         notifyDataSetChanged();
     }

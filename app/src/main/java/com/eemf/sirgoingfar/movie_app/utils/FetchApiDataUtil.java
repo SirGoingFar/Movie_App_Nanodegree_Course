@@ -55,7 +55,7 @@ public class FetchApiDataUtil {
         mDb = MovieAppRoomDatabase.getInstance(context);
 
         //prepare database first
-        clearDatabase();
+        clearDatabase(movieType);
 
         //populate the Database iteratively
         for (MovieContent movieContent : movieList) {
@@ -66,8 +66,8 @@ public class FetchApiDataUtil {
                     movieContent.getPosterPath(),
                     movieContent.getOverview(),
                     movieContent.getReleaseDate(),
-                    movieContent.getVoteAverage()
-            );
+                    movieContent.getVoteAverage(),
+                    movieType);
 
             mDb.getMovieDao().insertMovie(movieEntity);
         }
@@ -75,15 +75,22 @@ public class FetchApiDataUtil {
         //set Preference flags
         prefs.setPrefApiDataPulledSuccessfully(!movieList.isEmpty());
         prefs.setDatabaseHasTopRatedMovieData(TextUtils.equals(movieType, TYPE_TOP_RATED_MOVIE));
+
+        //Set individual Movie type flag
+        if (TextUtils.equals(movieType, TYPE_TOP_RATED_MOVIE))
+            prefs.setIsTopRatedMovieApiDataFetchedSuccessfully(true);
+
+        if (TextUtils.equals(movieType, TYPE_POPULAR_MOVIE))
+            prefs.setIsPopularMovieApiDataFetchedSuccessfully(true);
     }
 
-    private static void clearDatabase() {
+    private static void clearDatabase(String movieType) {
 
-        List<MovieEntity> allMovie = mDb.getMovieDao().loadAllMovieUnobserved();
+        List<MovieEntity> allMovieType = mDb.getMovieDao().loadAllMovieTypeUnobserved(movieType);
 
-        //clear the DB if the database was earlier populated
-        if (!allMovie.isEmpty())
-            mDb.getMovieDao().deleteAllMovie();
+        //clear the DB if the database was earlier populated with the movie type
+        if (!allMovieType.isEmpty())
+            mDb.getMovieDao().deleteAllMovieType(movieType);
     }
 
     private static ApiData fetchApiData(Context context, @NonNull String movieType) {

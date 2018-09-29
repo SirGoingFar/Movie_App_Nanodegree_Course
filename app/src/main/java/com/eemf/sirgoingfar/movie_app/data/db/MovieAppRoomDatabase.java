@@ -5,7 +5,8 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-@Database(entities = {MovieEntity.class}, version = 1, exportSchema = false)
+@Database(entities = {MovieEntity.class, MovieReviewEntity.class, MovieTrailerEntity.class, PopularMovieEntity.class},
+        version = 1, exportSchema = false)
 public abstract class MovieAppRoomDatabase extends RoomDatabase {
 
     private static final String DATABASE_NAME = "movie_app_db";
@@ -26,4 +27,9 @@ public abstract class MovieAppRoomDatabase extends RoomDatabase {
 
     public abstract MovieDao getMovieDao();
 
+    public MovieReviewDao getMovieReviewDao;
+
+    public MovieTrailerDao getMovieTrailerDao;
+
+    public PopularMovieDao getPopularMovieDao;
 }
