@@ -26,6 +26,6 @@ public class ApiDataFetchIntentService extends IntentService {
                 PreferenceUtil.getsInstance(context).doesDatabaseHaveTopRatedMovieData() ?
                         FetchApiDataUtil.TYPE_TOP_RATED_MOVIE : FetchApiDataUtil.TYPE_POPULAR_MOVIE;
 
-        FetchApiDataUtil.execute(context, sortOrderUrl);
+        FetchApiDataUtil.execute(context, FetchApiDataUtil.ACTION_FETCH_MOVIE_DATA, sortOrderUrl);
     }
 }

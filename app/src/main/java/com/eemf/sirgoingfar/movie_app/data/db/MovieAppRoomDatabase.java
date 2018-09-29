@@ -25,11 +25,5 @@ public abstract class MovieAppRoomDatabase extends RoomDatabase {
         return sInstance;
     }
 
-    public abstract MovieDao getMovieDao();
-
-    public MovieReviewDao getMovieReviewDao;
-
-    public MovieTrailerDao getMovieTrailerDao;
-
-    public PopularMovieDao getPopularMovieDao;
+    public abstract AllTableDao getDao();
 }

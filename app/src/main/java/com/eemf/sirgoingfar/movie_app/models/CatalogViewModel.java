@@ -14,7 +14,7 @@ public class CatalogViewModel extends ViewModel {
     private LiveData<List<MovieEntity>> allMoviesType;
 
     public CatalogViewModel(MovieAppRoomDatabase mDb, String movieType) {
-        allMoviesType = mDb.getMovieDao().loadAllMovieType(movieType);
+        allMoviesType = mDb.getDao().loadAllMovieType(movieType);
     }
 
     public LiveData<List<MovieEntity>> getAllMoviesType() {

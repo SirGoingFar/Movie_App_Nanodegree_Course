@@ -11,7 +11,7 @@ public class MovieDetailViewModel extends ViewModel {
     private LiveData<MovieEntity> movieObject;
 
     public MovieDetailViewModel(MovieAppRoomDatabase mDb, int movieId) {
-        movieObject = mDb.getMovieDao().loadMovieById(movieId);
+        movieObject = mDb.getDao().loadMovieById(movieId);
     }
 
     public LiveData<MovieEntity> getMovieObject() {
