@@ -58,7 +58,7 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.Holder> 
         @BindView(R.id.container)
         ConstraintLayout container;
 
-        public Holder(View itemView) {
+        Holder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             container.setOnClickListener(this);
