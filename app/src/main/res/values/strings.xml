@@ -26,5 +26,9 @@
     <string name="movie_title_holder">SNAKE IN THE EAGLE SHADOW</string>
     <string name="trailer_1">Trailer 1</string>
     <string name="trailer_unavaliable">Trailer unavailable</string>
+    <string name="review_unavaliable">Review unavailable</string>
+    <string name="keyword_review">REVIEW</string>
+    <string name="keyword_anonymous">Anonymous</string>
+    <string name="keyphrase_no_review">No review</string>
 
 </resources>

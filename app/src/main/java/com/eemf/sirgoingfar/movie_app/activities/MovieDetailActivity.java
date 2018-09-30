@@ -20,16 +20,17 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.eemf.sirgoingfar.movie_app.R;
+import com.eemf.sirgoingfar.movie_app.adapters.ReviewAdapter;
 import com.eemf.sirgoingfar.movie_app.adapters.TrailerAdapter;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
+import com.eemf.sirgoingfar.movie_app.data.db.MovieReviewEntity;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieTrailerEntity;
 import com.eemf.sirgoingfar.movie_app.models.MovieDetailViewModel;
 import com.eemf.sirgoingfar.movie_app.models.MovieDetailViewModelFactory;
 import com.eemf.sirgoingfar.movie_app.utils.Constants;
 import com.eemf.sirgoingfar.movie_app.utils.FetchApiDataUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -37,6 +38,7 @@ import butterknife.ButterKnife;
 
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_EMPTY;
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_FILLED;
+import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_NO_REVIEW;
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_NO_TRAILER;
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -69,12 +71,19 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.empty_trailer_holder)
     TextView noTrailerHolder;
 
-    //Lists
-    List<MovieTrailerEntity> trailerList = new ArrayList<>();
+    @BindView(R.id.rv_review)
+    RecyclerView reviewRecyclerView;
+
+    @BindView(R.id.pb_review_layout_loader)
+    ProgressBar reviewLoader;
+
+    @BindView(R.id.empty_review_holder)
+    TextView noReviewHolder;
 
     //Other variables
     private MovieEntity movieObject;
     private TrailerAdapter trailerAdapter;
+    private ReviewAdapter reviewAdapter;
     private MovieAppRoomDatabase mDb;
 
     @Override
@@ -120,6 +129,64 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         //get the List of Trailers
         getTrailerFromDb(false);
+
+        //get the List of Reviews
+        getReviewFromDb(false);
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void getReviewFromDb(final boolean isCallFromPostExecute) {
+
+        new AsyncTask<Void, Void, List<MovieReviewEntity>>() {
+
+            @Override
+            protected List<MovieReviewEntity> doInBackground(Void... voids) {
+                return mDb.getDao().getAllReviewByMovieId(String.valueOf(movieObject.getMovieId()));
+            }
+
+            @Override
+            protected void onPostExecute(List<MovieReviewEntity> movieReviewEntities) {
+
+                //check if the object is present - fetch Review from either DB or API
+                if (movieReviewEntities.isEmpty()) {
+                    if (!isCallFromPostExecute)
+                        fetchApiReviewData();
+                    else
+                        switchReviewLayoutState(STATE_NO_REVIEW);
+                } else {
+                    //set the adapter list
+                    reviewAdapter.setmList(movieReviewEntities);
+
+                    //switch to the filled state
+                    switchReviewLayoutState(STATE_FILLED);
+                }
+            }
+
+        }.execute();
+
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void fetchApiReviewData() {
+
+        //change to the empty state view
+        switchReviewLayoutState(STATE_EMPTY);
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                FetchApiDataUtil.execute(MovieDetailActivity.this,
+                        FetchApiDataUtil.ACTION_FETCH_MOVIE_REVIEW,
+                        String.valueOf(movieObject.getMovieId()));
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                getReviewFromDb(true);
+            }
+        }.execute();
 
     }
 
@@ -197,6 +264,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         trailerAdapter = new TrailerAdapter(this);
         trailerRecyclerView.setHasFixedSize(true);
         trailerRecyclerView.setAdapter(trailerAdapter);
+
+        reviewAdapter = new ReviewAdapter(this);
+        reviewRecyclerView.setHasFixedSize(true);
+        reviewRecyclerView.setNestedScrollingEnabled(false);
+        reviewRecyclerView.setAdapter(reviewAdapter);
     }
 
     @Override
@@ -228,6 +300,31 @@ public class MovieDetailActivity extends AppCompatActivity {
                 trailerLoader.setVisibility(View.GONE);
                 trailerRecyclerView.setVisibility(View.GONE);
                 noTrailerHolder.setVisibility(View.VISIBLE);
+                break;
+
+        }
+    }
+
+    private void switchReviewLayoutState(int state) {
+
+        switch (state) {
+
+            case STATE_EMPTY:
+                reviewLoader.setVisibility(View.VISIBLE);
+                reviewRecyclerView.setVisibility(View.GONE);
+                noReviewHolder.setVisibility(View.GONE);
+                break;
+
+            case STATE_FILLED:
+                reviewLoader.setVisibility(View.GONE);
+                reviewRecyclerView.setVisibility(View.VISIBLE);
+                noReviewHolder.setVisibility(View.GONE);
+                break;
+
+            case STATE_NO_REVIEW:
+                reviewLoader.setVisibility(View.GONE);
+                reviewRecyclerView.setVisibility(View.GONE);
+                noReviewHolder.setVisibility(View.VISIBLE);
                 break;
 
         }

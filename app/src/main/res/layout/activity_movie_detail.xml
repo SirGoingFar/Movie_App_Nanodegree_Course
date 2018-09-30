@@ -42,6 +42,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/dimen_5dp"
+                    android:layout_marginStart="@dimen/dimen_5dp"
                     android:text="@string/loading"
                     android:textColor="@color/colorSecondaryText"
                     android:textSize="@dimen/text_16sp"
@@ -129,7 +130,7 @@
             android:layout_marginRight="@dimen/dimen_20dp"
             android:layout_marginTop="@dimen/dimen_10dp"
             android:lineSpacingExtra="@dimen/dimen_1dp"
-            android:textColor="@color/colorSecondaryText"
+            android:textColor="@color/colorBlack"
             android:textSize="@dimen/text_15sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -175,13 +176,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginLeft="@dimen/dimen_20dp"
-                android:layout_marginStart="@dimen/dimen_20dp"
+                android:layout_marginLeft="@dimen/dimen_15dp"
+                android:layout_marginStart="@dimen/dimen_15dp"
                 android:gravity="center"
-                android:textStyle="bold"
                 android:text="@string/trailer_unavaliable"
                 android:textColor="@color/colorSecondaryText"
-                android:textSize="@dimen/text_16sp" />
+                android:textSize="@dimen/text_16sp"
+                android:textStyle="bold" />
 
         </FrameLayout>
 
@@ -213,11 +214,72 @@
             android:layout_marginRight="@dimen/dimen_20dp"
             android:layout_marginTop="@dimen/dimen_10dp"
             android:progressDrawable="@drawable/bg_user_rating_progress"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tv_review_header"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_user_rating_header" />
 
+        <TextView
+            android:id="@+id/tv_review_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dimen_20dp"
+            android:layout_marginLeft="@dimen/dimen_20dp"
+            android:layout_marginRight="@dimen/dimen_20dp"
+            android:layout_marginStart="@dimen/dimen_20dp"
+            android:layout_marginTop="@dimen/dimen_15dp"
+            android:text="@string/keyword_review"
+            android:textAllCaps="true"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/text_20sp"
+            android:textStyle="bold"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pb_user_rating" />
+
+        <FrameLayout
+            android:id="@+id/fl_layout_review"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dimen_20dp"
+            android:layout_marginTop="@dimen/dimen_10dp"
+            android:minHeight="@dimen/dimen_40dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_review_header">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_review"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_movie_review" />
+
+            <ProgressBar
+                android:id="@+id/pb_review_layout_loader"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/empty_review_holder"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="@string/review_unavaliable"
+                android:textColor="@color/colorSecondaryText"
+                android:textSize="@dimen/text_16sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
 
     </android.support.constraint.ConstraintLayout>
 

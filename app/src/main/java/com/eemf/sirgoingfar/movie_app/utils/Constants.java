@@ -10,6 +10,7 @@ public class Constants {
     public static final int STATE_EMPTY = 0;
     public static final int STATE_FILLED = 1;
     public static final int STATE_NO_TRAILER = 2;
+    public static final int STATE_NO_REVIEW = 3;
 
     //YouTube base URL
     public static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";

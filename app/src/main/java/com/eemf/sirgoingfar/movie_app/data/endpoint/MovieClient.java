@@ -1,6 +1,7 @@
 package com.eemf.sirgoingfar.movie_app.data.endpoint;
 
 import com.eemf.sirgoingfar.movie_app.data.MovieApiData;
+import com.eemf.sirgoingfar.movie_app.data.ReviewContent;
 import com.eemf.sirgoingfar.movie_app.data.VideoContent;
 
 import retrofit2.Call;
@@ -14,4 +15,7 @@ public interface MovieClient {
 
     @GET("3/movie/{movie_id}/videos?api_key={api_key}")
     Call<VideoContent> fetchMovieTrailerData(@Path("movie_id") String movieId);
+
+    @GET("3/movie/{movie_id}/reviews?api_key={api_key}")
+    Call<ReviewContent> fetchMovieReviewData(@Path("movie_id") String movieId);
 }

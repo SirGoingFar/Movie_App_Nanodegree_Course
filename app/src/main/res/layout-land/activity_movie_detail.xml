@@ -9,54 +9,114 @@
     android:baselineAligned="false"
     android:orientation="horizontal">
 
-    <RelativeLayout
-        android:id="@+id/iv_movie_poster_container"
+    <ScrollView
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:scrollbars="none">
 
         <android.support.constraint.ConstraintLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_margin="@dimen/dimen_20dp">
+            android:layout_gravity="center">
 
-            <ProgressBar
-                android:id="@+id/pb_image_loader"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:indeterminate="true"
-                app:layout_constraintBottom_toBottomOf="parent"
+            <RelativeLayout
+                android:id="@+id/iv_movie_poster_container"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:layout_marginTop="@dimen/dimen_15dp"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/tv_loading_notif_holder"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_loading_notif_holder"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/dimen_5dp"
-                android:text="@string/loading"
-                android:textColor="@color/colorSecondaryText"
-                android:textSize="@dimen/text_16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@+id/pb_image_loader"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_margin="@dimen/dimen_20dp">
+
+                    <ProgressBar
+                        android:id="@+id/pb_image_loader"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:indeterminate="true"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toLeftOf="@+id/tv_loading_notif_holder"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_loading_notif_holder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/dimen_5dp"
+                        android:text="@string/loading"
+                        android:textColor="@color/colorSecondaryText"
+                        android:textSize="@dimen/text_16sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toRightOf="@+id/pb_image_loader"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </android.support.constraint.ConstraintLayout>
+
+                <ImageView
+                    android:id="@+id/iv_movie_poster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@string/movie_poster"
+                    android:scaleType="fitCenter" />
+
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/fl_layout_review"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dimen_20dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                android:minHeight="@dimen/dimen_40dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/iv_movie_poster_container">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_review"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_movie_review" />
+
+                <ProgressBar
+                    android:id="@+id/pb_review_layout_loader"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="true" />
+
+                <TextView
+                    android:id="@+id/empty_review_holder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="@string/review_unavaliable"
+                    android:textColor="@color/colorSecondaryText"
+                    android:textSize="@dimen/text_16sp"
+                    android:textStyle="bold" />
+
+            </FrameLayout>
+
         </android.support.constraint.ConstraintLayout>
 
-        <ImageView
-            android:id="@+id/iv_movie_poster"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/movie_poster"
-            android:scaleType="fitCenter" />
-
-    </RelativeLayout>
+    </ScrollView>
 
     <View
         android:id="@+id/header_divider"
@@ -70,8 +130,9 @@
 
     <ScrollView
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:scrollbars="none">
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
@@ -135,7 +196,7 @@
                 android:layout_marginRight="@dimen/dimen_20dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:lineSpacingExtra="@dimen/dimen_1dp"
-                android:textColor="@color/colorSecondaryText"
+                android:textColor="@color/colorBlack"
                 android:textSize="@dimen/text_15sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"

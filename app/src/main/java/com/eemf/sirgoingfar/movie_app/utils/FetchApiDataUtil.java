@@ -6,9 +6,11 @@ import android.text.TextUtils;
 
 import com.eemf.sirgoingfar.movie_app.data.MovieApiData;
 import com.eemf.sirgoingfar.movie_app.data.MovieContent;
+import com.eemf.sirgoingfar.movie_app.data.ReviewContent;
 import com.eemf.sirgoingfar.movie_app.data.VideoContent;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
+import com.eemf.sirgoingfar.movie_app.data.db.MovieReviewEntity;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieTrailerEntity;
 import com.eemf.sirgoingfar.movie_app.data.endpoint.MovieClient;
 
@@ -86,7 +88,7 @@ public class FetchApiDataUtil {
     private static void saveToDatabase(Context context, VideoContent content, int movieId) {
 
         //clear the Trailer Db for the movieId
-        clearDatabase(movieId);
+        clearTrailerDatabase(movieId);
 
         //save the TrailerEntity object(s) into the Db
         for (VideoContent.ResultsItem item : content.getResults()) {
@@ -101,7 +103,7 @@ public class FetchApiDataUtil {
         }
     }
 
-    private static void clearDatabase(int movieId) {
+    private static void clearTrailerDatabase(int movieId) {
 
         List<MovieTrailerEntity> allMovieIdTrailer = mDb.getDao().getAllTrailerByMovieId(String.valueOf(movieId));
 
@@ -124,6 +126,65 @@ public class FetchApiDataUtil {
     }
 
     private static void fetchMovieReview(Context context, String queryParams) {
+
+        int movieId;
+
+        try {
+            movieId = Integer.parseInt(queryParams);
+        } catch (NumberFormatException ex) {
+            ex.printStackTrace();
+            movieId = -1;
+        }
+
+        if (movieId < 0)
+            return;
+
+        //fetch Review data
+        ReviewContent content = fetchReviewApiData(queryParams);
+
+        if (content != null && !content.getResults().isEmpty())
+            saveToDatabase(context, content, movieId);
+
+    }
+
+    private static void saveToDatabase(Context context, ReviewContent content, int movieId) {
+
+        //clear the Trailer Db for the movieId
+        clearReviewDatabase(movieId);
+
+        //save the ReviewEntity object(s) into the Db
+        for (ReviewContent.ResultsItem item : content.getResults()) {
+            MovieReviewEntity reviewObject = new MovieReviewEntity(
+                    content.getId(),
+                    item.getAuthor(),
+                    item.getContent()
+            );
+
+            mDb.getDao().insertReviewObject(reviewObject);
+        }
+
+    }
+
+    private static void clearReviewDatabase(int movieId) {
+
+        List<MovieReviewEntity> allMovieIdReview = mDb.getDao().getAllReviewByMovieId(String.valueOf(movieId));
+
+        if (!allMovieIdReview.isEmpty())
+            mDb.getDao().deleteAllReviewByMovieId(movieId);
+
+    }
+
+    private static ReviewContent fetchReviewApiData(String movieId) {
+        Retrofit retrofit = NetworkIOHelper.getRetrofitInstance(BASE_URL, false);
+
+        try {
+            return (retrofit.create(MovieClient.class)
+                    .fetchMovieReviewData(movieId)
+                    .execute()).body();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static void fetchMovieTypeApiData(Context context, String movieType) {
@@ -143,7 +204,7 @@ public class FetchApiDataUtil {
     private static void saveToDatabase(Context context, String movieType, List<MovieContent> movieList) {
 
         //prepare database first
-        clearDatabase(movieType);
+        clearMovieDatabase(movieType);
 
         //populate the Database iteratively
         for (MovieContent movieContent : movieList) {
@@ -172,7 +233,7 @@ public class FetchApiDataUtil {
             prefs.setIsPopularMovieApiDataFetchedSuccessfully(true);
     }
 
-    private static void clearDatabase(String movieType) {
+    private static void clearMovieDatabase(String movieType) {
 
         List<MovieEntity> allMovieType = mDb.getDao().loadAllMovieTypeUnobserved(movieType);
 

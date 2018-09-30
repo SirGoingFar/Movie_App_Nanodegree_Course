@@ -50,10 +50,13 @@ public interface AllTableDao {
 
     //Review
     @Query("SELECT * FROM movieReviewEntity WHERE movie_id = :movieId")
-    List<MovieReviewEntity> getAllReviewByMovieId(int movieId);
+    List<MovieReviewEntity> getAllReviewByMovieId(String movieId);
 
     @Query("DELETE FROM movieReviewEntity WHERE movie_id = :movieId")
     void deleteAllReviewByMovieId(int movieId);
+
+    @Insert
+    void insertReviewObject(MovieReviewEntity reviewEntityObject);
 
 
     //Favorite Movie
