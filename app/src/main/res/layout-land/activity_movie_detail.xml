@@ -17,7 +17,9 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/dimen_10dp"
+            android:layout_marginTop="@dimen/dimen_10dp">
 
             <RelativeLayout
                 android:id="@+id/iv_movie_poster_container"
@@ -25,10 +27,10 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:layout_marginTop="@dimen/dimen_10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/fl_layout_review">
 
                 <android.support.constraint.ConstraintLayout
                     android:layout_width="wrap_content"
@@ -74,7 +76,6 @@
                 android:id="@+id/fl_layout_review"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dimen_10dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:minHeight="@dimen/dimen_40dp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -110,7 +111,7 @@
                     android:text="@string/review_unavaliable"
                     android:textColor="@color/colorSecondaryText"
                     android:textSize="@dimen/text_16sp"
-                    android:textStyle="bold"
+                    android:textStyle="bold|italic"
                     android:visibility="gone" />
 
             </FrameLayout>
@@ -156,8 +157,11 @@
                 android:textSize="@dimen/text_25sp"
                 android:textStyle="bold"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/tv_release_date" />
 
             <TextView
                 android:id="@+id/tv_release_date"
@@ -168,8 +172,11 @@
                 android:textColor="@color/colorSecondaryText"
                 android:textSize="@dimen/text_15sp"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_movie_title"
+                app:layout_constraintBottom_toTopOf="@+id/ll_favorite"
                 tools:text="@string/release_date" />
 
             <LinearLayout
@@ -178,10 +185,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+                app:layout_constraintBottom_toTopOf="@+id/tv_overview_header"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -205,7 +213,7 @@
 
             <TextView
                 android:id="@+id/tv_overview_header"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/dimen_20dp"
                 android:layout_marginRight="@dimen/dimen_20dp"
@@ -218,8 +226,11 @@
                 app:layout_goneMarginTop="@dimen/dimen_10dp"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ll_favorite" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ll_favorite"
+                app:layout_constraintBottom_toTopOf="@+id/tv_synopsis" />
 
             <TextView
                 android:id="@+id/tv_synopsis"
@@ -232,16 +243,17 @@
                 android:textColor="@color/colorBlack"
                 android:textSize="@dimen/text_12sp"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_overview_header" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_overview_header"
+                app:layout_constraintBottom_toTopOf="@+id/fl_layout_trailer" />
 
             <FrameLayout
                 android:id="@+id/fl_layout_trailer"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/dimen_10dp"
-                android:layout_marginEnd="@dimen/dimen_20dp"
-                android:layout_marginRight="@dimen/dimen_20dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:minHeight="@dimen/dimen_40dp"
                 app:layout_constraintBottom_toTopOf="@+id/tv_user_rating_header"
@@ -275,10 +287,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginLeft="@dimen/dimen_20dp"
-                    android:layout_marginStart="@dimen/dimen_20dp"
                     android:gravity="center"
-                    android:textStyle="bold"
+                    android:textStyle="bold|italic"
                     android:text="@string/trailer_unavaliable"
                     android:textColor="@color/colorSecondaryText"
                     android:textSize="@dimen/text_16sp"
@@ -294,7 +304,7 @@
                 android:layout_marginLeft="@dimen/dimen_20dp"
                 android:layout_marginRight="@dimen/dimen_20dp"
                 android:layout_marginStart="@dimen/dimen_20dp"
-                android:layout_marginTop="@dimen/dimen_15dp"
+                android:layout_marginTop="@dimen/dimen_20dp"
                 android:text="@string/user_rating"
                 android:textAllCaps="true"
                 android:textColor="@color/colorBlack"
@@ -302,7 +312,8 @@
                 android:textStyle="bold"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fl_layout_trailer" />
+                app:layout_constraintTop_toBottomOf="@+id/fl_layout_trailer"
+                app:layout_constraintBottom_toTopOf="@+id/fl_layout_trailer" />
 
             <ProgressBar
                 android:id="@+id/pb_user_rating"

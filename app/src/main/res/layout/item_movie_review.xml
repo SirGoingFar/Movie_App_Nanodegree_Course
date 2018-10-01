@@ -26,7 +26,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:padding="@dimen/dimen_10dp"
             android:textStyle="bold"
-            android:textSize="@dimen/text_18sp"
+            android:textSize="@dimen/text_14sp"
             android:textAllCaps="true"
             android:gravity="center"
             android:textColor="@color/colorAccent" />

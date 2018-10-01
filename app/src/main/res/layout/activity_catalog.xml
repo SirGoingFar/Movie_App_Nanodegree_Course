@@ -1,68 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.v4.widget.SwipeRefreshLayout android:id="@+id/sr_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.eemf.sirgoingfar.movie_app.activities.CatalogActivity">
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/sr_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <FrameLayout
+        <!--Empty State View-->
+        <RelativeLayout
+            android:id="@+id/rl_empty_state"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <!--Empty State View-->
-            <RelativeLayout
-                android:id="@+id/rl_empty_state"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/empty_state_message_holder"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="@dimen/dimen_10dp"
-                    android:gravity="center"
-                    android:text="@string/data_loading_please_wait"
-                    android:textColor="@color/colorSecondaryText"
-                    android:textSize="@dimen/text_20sp"
-                    android:lineSpacingExtra="@dimen/dimen_5dp" />
-
-                <ProgressBar
-                    android:id="@+id/pb_data_loader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="@dimen/dimen_5dp" />
-
-            </RelativeLayout>
-
-            <!--Filled State View-->
-            <FrameLayout
-                android:id="@+id/fl_filled_state"
+            <TextView
+                android:id="@+id/empty_state_message_holder"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/colorBlack"
-                android:visibility="gone">
+                android:layout_margin="@dimen/dimen_10dp"
+                android:gravity="center"
+                android:text="@string/data_loading_please_wait"
+                android:textColor="@color/colorSecondaryText"
+                android:textSize="@dimen/text_20sp"
+                android:lineSpacingExtra="@dimen/dimen_5dp" />
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rv_movie_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
+            <ProgressBar
+                android:id="@+id/pb_data_loader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="@dimen/dimen_5dp" />
 
-            </FrameLayout>
+        </RelativeLayout>
 
+        <!--Filled State View-->
+        <FrameLayout
+            android:id="@+id/fl_filled_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBlack"
+            android:visibility="gone">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_movie_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="android.support.v7.widget.GridLayoutManager"
+                android:orientation="vertical" />
 
         </FrameLayout>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
 
-</android.support.constraint.ConstraintLayout>
+    </FrameLayout>
+
+</android.support.v4.widget.SwipeRefreshLayout>

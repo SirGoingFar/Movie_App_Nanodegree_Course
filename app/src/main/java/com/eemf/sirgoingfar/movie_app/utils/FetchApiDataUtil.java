@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.eemf.sirgoingfar.movie_app.BuildConfig;
 import com.eemf.sirgoingfar.movie_app.data.MovieApiData;
 import com.eemf.sirgoingfar.movie_app.data.MovieContent;
 import com.eemf.sirgoingfar.movie_app.data.ReviewContent;
@@ -118,7 +119,7 @@ public class FetchApiDataUtil {
 
         try {
             return (retrofit.create(MovieClient.class)
-                    .fetchMovieTrailerData(movieId)
+                    .fetchMovieTrailerData(movieId, BuildConfig.API_KEY)
                     .execute()).body();
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,7 +181,7 @@ public class FetchApiDataUtil {
 
         try {
             return (retrofit.create(MovieClient.class)
-                    .fetchMovieReviewData(movieId)
+                    .fetchMovieReviewData(movieId, BuildConfig.API_KEY)
                     .execute()).body();
         } catch (IOException e) {
             e.printStackTrace();
@@ -253,7 +254,7 @@ public class FetchApiDataUtil {
         try {
 
             Response<MovieApiData> result = retrofit.create(MovieClient.class)
-                    .fetchMovieData(movieType).execute();
+                    .fetchMovieData(movieType, BuildConfig.API_KEY).execute();
 
             //notify that a network call has ended
             prefs.setIsNetworkCallInProgress(false);
