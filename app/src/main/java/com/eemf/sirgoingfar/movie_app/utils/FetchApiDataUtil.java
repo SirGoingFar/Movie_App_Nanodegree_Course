@@ -26,6 +26,7 @@ public class FetchApiDataUtil {
     private static final String BASE_URL = "http://api.themoviedb.org/";
     public static final String TYPE_POPULAR_MOVIE = "popular";
     public static final String TYPE_TOP_RATED_MOVIE = "top_rated";
+    public static final String TYPE_FAVORITE_MOVIE = "favorite";
 
     //ACTIONS
     public static final String ACTION_FETCH_MOVIE_DATA = "fetch_movie_data";

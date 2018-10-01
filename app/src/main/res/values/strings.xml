@@ -14,8 +14,10 @@
     <string name="pref_sort_order_title">Movies Sort Order</string>
     <string name="pref_popular_movie_label">Most Popular Movies</string>
     <string name="pref_top_rated_movie_label">Top Rated Movies</string>
+    <string name="pref_favorite_movie_label">Favorite Movies</string>
     <string name="pref_popular_movie_value" translatable="false">popular</string>
     <string name="pref_top_rated_movie_value" translatable="false">top_rated</string>
+    <string name="pref_favorite_movie_value" translatable="false">favorite</string>
 
     <!--Other Strings-->
     <string name="keyword_settings">Settings</string>
@@ -30,5 +32,7 @@
     <string name="keyword_review">REVIEW</string>
     <string name="keyword_anonymous">Anonymous</string>
     <string name="keyphrase_no_review">No review</string>
+    <string name="keyword_favorite">Favorite</string>
+    <string name="msg_no_favorite_movie">You have no favorite movie. Please change the sort order.</string>
 
 </resources>

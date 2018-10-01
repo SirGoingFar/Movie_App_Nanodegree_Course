@@ -4,16 +4,20 @@ import android.annotation.SuppressLint;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -41,7 +45,7 @@ import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_FILLED;
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_NO_REVIEW;
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_NO_TRAILER;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements View.OnClickListener {
 
     //constant
     private final int TOTAL_RATING = 10;
@@ -80,11 +84,21 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.empty_review_holder)
     TextView noReviewHolder;
 
+    @BindView(R.id.ll_favorite)
+    LinearLayout favoritePickerContainer;
+
+    @BindView(R.id.tv_favorite)
+    TextView favoriteTextView;
+
+    @BindView(R.id.ic_favorite)
+    ImageView favoriteIcon;
+
     //Other variables
     private MovieEntity movieObject;
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
     private MovieAppRoomDatabase mDb;
+    private SharedPreferences sharedPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +106,9 @@ public class MovieDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_detail);
         ButterKnife.bind(this);
 
-        //Instantiate the Db instance
+        //Instantiate the needed instances
         mDb = MovieAppRoomDatabase.getInstance(this);
+        sharedPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -269,6 +284,18 @@ public class MovieDetailActivity extends AppCompatActivity {
         reviewRecyclerView.setHasFixedSize(true);
         reviewRecyclerView.setNestedScrollingEnabled(false);
         reviewRecyclerView.setAdapter(reviewAdapter);
+
+        favoriteIcon.setOnClickListener(this);
+        favoriteTextView.setOnClickListener(this);
+
+        //show or hide the Favorite picker
+        if (TextUtils.equals(
+                sharedPreference.getString(getString(R.string.pref_sort_order_key), FetchApiDataUtil.TYPE_POPULAR_MOVIE),
+                FetchApiDataUtil.TYPE_FAVORITE_MOVIE
+        ))
+            favoritePickerContainer.setVisibility(View.GONE);
+        else
+            toggleFavoriteOption(movieObject.isFavorite());
     }
 
     @Override
@@ -328,5 +355,39 @@ public class MovieDetailActivity extends AppCompatActivity {
                 break;
 
         }
+    }
+
+    @Override
+    public void onClick(View clickedView) {
+
+        switch (clickedView.getId()) {
+
+            case R.id.tv_favorite:
+            case R.id.ic_favorite:
+                toggleFavoriteOption(!movieObject.isFavorite());
+                updateDatabase();
+                break;
+        }
+    }
+
+    private void toggleFavoriteOption(boolean isSelected) {
+        favoriteTextView.setSelected(isSelected);
+        favoriteIcon.setSelected(isSelected);
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void updateDatabase() {
+
+        //toggle object itself
+        movieObject.setFavorite(!movieObject.isFavorite());
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                mDb.getDao().updateMovie(movieObject);
+                return null;
+            }
+        }.execute();
+
     }
 }
