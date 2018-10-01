@@ -86,8 +86,10 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         currentSortOrder = sharedPreference.getString(getString(R.string.pref_sort_order_key), FetchApiDataUtil.TYPE_POPULAR_MOVIE);
 
         //populate the screen
-        if (prefs.isApiDataPulledSuccessfully()) {
-            if (doesCurrentMovieDataMatchUserSortOrder())
+        if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
+            fetchFavoriteMovies();
+        else if (prefs.isApiDataPulledSuccessfully()) {
+            if (doesCurrentSortOrderMovieExistInDb())
                 fetchDataFromDb(currentSortOrder);
             else
                 fetchMovieApiData(currentSortOrder);
@@ -132,7 +134,8 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                 else
                     fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
 
-            }
+            } else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
+                fetchFavoriteMovies();
         }
     }
 
@@ -175,59 +178,66 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     }
 
     private void fetchMovieApiData() {
-        fetchMovieApiData(TextUtils.equals(currentSortOrder, getString(R.string.pref_popular_movie_value)) ?
-                FetchApiDataUtil.TYPE_POPULAR_MOVIE : FetchApiDataUtil.TYPE_TOP_RATED_MOVIE);
+
+        setCurrentSortOrder();
+
+        if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
+            fetchFavoriteMovies();
+        else
+            fetchMovieApiData(currentSortOrder);
     }
 
     @SuppressLint("StaticFieldLeak")
     private void fetchMovieApiData(final String movieSortOrder) {
 
-        //check if the data to be fetched is the current one in the Db
+        //check if the data to be fetched is available in the Db
         if (prefs.isApiDataPulledSuccessfully()) {
 
-            if (prefs.doesDatabaseHaveTopRatedMovieData())
-                currentSortOrder = FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
-            else
-                currentSortOrder = FetchApiDataUtil.TYPE_POPULAR_MOVIE;
+            if (TextUtils.equals(movieSortOrder, FetchApiDataUtil.TYPE_POPULAR_MOVIE)
+                    && prefs.isPopularMovieApiDataFetchedSuccessfully()) {
 
-            if (TextUtils.equals(currentSortOrder, movieSortOrder)) {
-                fetchDataFromDb(currentSortOrder);
-                return;
-            }
-        }
+                fetchDataFromDb(movieSortOrder);
 
-        if (prefs.isNetworkCallInProgress()) {
-            showSnackbar(getString(R.string.pls_retry), getString(R.string.keyword_retry), refreshAction());
-            switchScreen(STATE_EMPTY);
-            emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
-            dataLoadingProgressBar.setVisibility(View.GONE);
-            return;
-        }
+            } else if (TextUtils.equals(movieSortOrder, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE)
+                    && prefs.isTopRatedMovieApiDataFetchedSuccessfully()) {
 
-        //start fetching data
-        if (!NetworkStatus.isConnected(this)
-                || NetworkStatus.isPoorConectivity(this)) {
-            notifyPoorConnectivity();
-            return;
-        }
-
-        //switch screen
-        switchScreen(STATE_EMPTY);
-
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                FetchApiDataUtil.execute(CatalogActivity.this, FetchApiDataUtil.ACTION_FETCH_MOVIE_DATA, movieSortOrder);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
                 fetchDataFromDb(movieSortOrder);
             }
-        }.execute();
 
+            //check if an API call is on
+            if (prefs.isNetworkCallInProgress()) {
+                showSnackbar(getString(R.string.pls_retry), getString(R.string.keyword_retry), refreshAction());
+                switchScreen(STATE_EMPTY);
+                emptyStateMessageHolder.setText(getString(R.string.pull_to_refresh_notif));
+                dataLoadingProgressBar.setVisibility(View.GONE);
+                return;
+            }
+
+            //check the network conectivity status
+            if (!NetworkStatus.isConnected(this)
+                    || NetworkStatus.isPoorConectivity(this)) {
+                notifyPoorConnectivity();
+                return;
+            }
+
+            //switch screen
+            switchScreen(STATE_EMPTY);
+
+            new AsyncTask<Void, Void, Void>() {
+
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    FetchApiDataUtil.execute(CatalogActivity.this, FetchApiDataUtil.ACTION_FETCH_MOVIE_DATA, movieSortOrder);
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    fetchDataFromDb(movieSortOrder);
+                }
+            }.execute();
+
+        }
     }
 
     private void notifyPoorConnectivity() {
@@ -250,15 +260,18 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
             @Override
             public void onRefresh() {
 
-                switchScreen(STATE_EMPTY);
-
                 swipeRefreshContainer.setRefreshing(false);
 
+                //set current sort order
+                setCurrentSortOrder();
+                //if the sort order is 'favorite', return
+                if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
+                    return;
+
+                switchScreen(STATE_EMPTY);
+
                 //fetch currentSortOrder API data
-                fetchMovieApiData(
-                        sharedPreference.getString(getString(R.string.pref_sort_order_key),
-                                FetchApiDataUtil.TYPE_POPULAR_MOVIE
-                        ));
+                fetchMovieApiData(currentSortOrder);
             }
         });
     }
@@ -275,26 +288,20 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
     }
 
-    private boolean doesCurrentMovieDataMatchUserSortOrder() {
+    private boolean doesCurrentSortOrderMovieExistInDb() {
 
         if (prefs.isApiDataPulledSuccessfully()) {
 
-            String currentMovieType;
+            if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_POPULAR_MOVIE))
+                return prefs.isPopularMovieApiDataFetchedSuccessfully();
 
-            //get the label of the data in the database
-            if (prefs.doesDatabaseHaveTopRatedMovieData())
-                currentMovieType = FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
             else
-                currentMovieType = FetchApiDataUtil.TYPE_POPULAR_MOVIE;
+                return TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_TOP_RATED_MOVIE)
+                        && prefs.isTopRatedMovieApiDataFetchedSuccessfully();
 
-            //get the value of the current sort order
-            currentSortOrder = TextUtils.equals(sharedPreference.getString(getString(R.string.pref_sort_order_key),
-                    FetchApiDataUtil.TYPE_POPULAR_MOVIE), getString(R.string.pref_popular_movie_value)) ?
-                    FetchApiDataUtil.TYPE_POPULAR_MOVIE : FetchApiDataUtil.TYPE_TOP_RATED_MOVIE;
-
-            return TextUtils.equals(currentMovieType, currentSortOrder);
         } else
             return false;
+
     }
 
     private Runnable refreshAction() {
@@ -339,4 +346,37 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         return noOfColumns;
     }
 
+    @SuppressLint("StaticFieldLeak")
+    private void fetchFavoriteMovies() {
+
+        switchScreen(STATE_EMPTY);
+
+        //set the toolbar title
+        if (actionBar != null) {
+            actionBar.setTitle(getString(R.string.pref_favorite_movie_label));
+        }
+
+        new AsyncTask<Void, Void, List<MovieEntity>>() {
+            @Override
+            protected List<MovieEntity> doInBackground(Void... voids) {
+                return mDb.getDao().loadAllFavoriteMovie();
+            }
+
+            @Override
+            protected void onPostExecute(List<MovieEntity> movieEntities) {
+
+                if (movieEntities.isEmpty()) {
+                    emptyStateMessageHolder.setText(getString(R.string.msg_no_favorite_movie));
+                    dataLoadingProgressBar.setVisibility(View.GONE);
+                } else {
+                    adapter.setmMovieList(movieEntities);
+                    switchScreen(STATE_FILLED);
+                }
+            }
+        }.execute();
+    }
+
+    private void setCurrentSortOrder() {
+        currentSortOrder = sharedPreference.getString(getString(R.string.pref_sort_order_key), FetchApiDataUtil.TYPE_POPULAR_MOVIE);
+    }
 }

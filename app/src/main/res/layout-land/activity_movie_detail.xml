@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:baselineAligned="false"
     android:orientation="horizontal">
 
     <ScrollView
@@ -26,7 +25,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:layout_marginTop="@dimen/dimen_15dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -66,7 +65,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/movie_poster"
-                    android:scaleType="fitCenter" />
+                    android:scaleType="fitCenter"
+                    android:layout_centerHorizontal="true" />
 
             </RelativeLayout>
 
@@ -74,7 +74,7 @@
                 android:id="@+id/fl_layout_review"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/dimen_20dp"
+                android:layout_marginBottom="@dimen/dimen_10dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:minHeight="@dimen/dimen_40dp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -110,7 +110,8 @@
                     android:text="@string/review_unavaliable"
                     android:textColor="@color/colorSecondaryText"
                     android:textSize="@dimen/text_16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone" />
 
             </FrameLayout>
 
@@ -171,6 +172,37 @@
                 app:layout_constraintTop_toBottomOf="@+id/tv_movie_title"
                 tools:text="@string/release_date" />
 
+            <LinearLayout
+                android:id="@+id/ll_favorite"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_release_date"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/ic_favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_favorite_white_24dp"
+                    android:background="@drawable/bg_favorite" />
+
+                <TextView
+                    android:id="@+id/tv_favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/keyword_favorite"
+                    android:textColor="@color/clickable_black_accent"
+                    android:textSize="@dimen/text_10sp" />
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/tv_overview_header"
                 android:layout_width="wrap_content"
@@ -181,12 +213,13 @@
                 android:text="@string/keyword_overview"
                 android:textAllCaps="true"
                 android:textColor="@color/colorBlack"
-                android:textSize="@dimen/text_20sp"
+                android:textSize="@dimen/text_16sp"
                 android:textStyle="bold"
+                app:layout_goneMarginTop="@dimen/dimen_10dp"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_release_date" />
+                app:layout_constraintTop_toBottomOf="@+id/ll_favorite" />
 
             <TextView
                 android:id="@+id/tv_synopsis"
@@ -195,9 +228,9 @@
                 android:layout_marginLeft="@dimen/dimen_20dp"
                 android:layout_marginRight="@dimen/dimen_20dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
-                android:lineSpacingExtra="@dimen/dimen_1dp"
+                android:lineSpacingExtra="@dimen/dimen_3dp"
                 android:textColor="@color/colorBlack"
-                android:textSize="@dimen/text_15sp"
+                android:textSize="@dimen/text_12sp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_overview_header" />
@@ -248,7 +281,8 @@
                     android:textStyle="bold"
                     android:text="@string/trailer_unavaliable"
                     android:textColor="@color/colorSecondaryText"
-                    android:textSize="@dimen/text_16sp" />
+                    android:textSize="@dimen/text_16sp"
+                    android:visibility="gone" />
 
             </FrameLayout>
 
@@ -264,7 +298,7 @@
                 android:text="@string/user_rating"
                 android:textAllCaps="true"
                 android:textColor="@color/colorBlack"
-                android:textSize="@dimen/text_20sp"
+                android:textSize="@dimen/text_16sp"
                 android:textStyle="bold"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintLeft_toLeftOf="parent"

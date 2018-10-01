@@ -60,22 +60,7 @@ public interface AllTableDao {
 
 
     //Favorite Movie
-    @Query("SELECT * FROM popularMovieEntity")
-    List<PopularMovieEntity> loadAllPopularMovieUnobserved();
-
-    @Query("SELECT * FROM popularMovieEntity")
-    LiveData<List<PopularMovieEntity>> loadAllPopularMovie();
-
-    @Query("SELECT * FROM popularMovieEntity  WHERE id=:id")
-    LiveData<PopularMovieEntity> loadPopularMovieById(int id);
-
-    @Query("DELETE FROM popularMovieEntity")
-    void deleteAllPopularMovie();
-
-    @Insert
-    void insertMovie(PopularMovieEntity popularMovieEntity);
-
-    @Update
-    void updateMovie(PopularMovieEntity movieEntity);
+    @Query("SELECT * FROM movieEntity WHERE favorite = 1")
+    List<MovieEntity> loadAllFavoriteMovie();
 
 }

@@ -29,11 +29,12 @@
                     android:id="@+id/empty_state_message_holder"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="@dimen/dimen_5dp"
+                    android:layout_margin="@dimen/dimen_10dp"
                     android:gravity="center"
                     android:text="@string/data_loading_please_wait"
                     android:textColor="@color/colorSecondaryText"
-                    android:textSize="@dimen/text_20sp" />
+                    android:textSize="@dimen/text_20sp"
+                    android:lineSpacingExtra="@dimen/dimen_5dp" />
 
                 <ProgressBar
                     android:id="@+id/pb_data_loader"

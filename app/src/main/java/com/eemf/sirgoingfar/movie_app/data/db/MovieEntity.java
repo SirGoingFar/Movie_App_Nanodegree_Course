@@ -32,7 +32,7 @@ public class MovieEntity {
     private String movieType;
 
     @ColumnInfo(name = "favorite")
-    private int favorite;
+    private boolean isFavorite;
 
     @Ignore
     public MovieEntity(int movieId, String originalTitle, String imagePath,
@@ -122,11 +122,11 @@ public class MovieEntity {
         this.movieType = movieType;
     }
 
-    public int getFavorite() {
-        return favorite;
+    public boolean isFavorite() {
+        return isFavorite;
     }
 
-    public void setFavorite(int favorite) {
-        this.favorite = favorite;
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
     }
 }
