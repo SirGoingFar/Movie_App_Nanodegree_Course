@@ -33,6 +33,6 @@
     <string name="keyword_anonymous">Anonymous</string>
     <string name="keyphrase_no_review">No review</string>
     <string name="keyword_favorite">Favorite</string>
-    <string name="msg_no_favorite_movie">You have no favorite movie. Please change the sort order.</string>
+    <string name="msg_no_favorite_movie">You have no favorite movie.\nPlease change the sort order.</string>
 
 </resources>

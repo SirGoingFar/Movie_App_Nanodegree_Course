@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -93,12 +94,16 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.ic_favorite)
     ImageView favoriteIcon;
 
+    @BindView(R.id.sr_movie_detail)
+    SwipeRefreshLayout swipeRefreshContainer;
+
     //Other variables
     private MovieEntity movieObject;
     private TrailerAdapter trailerAdapter;
     private ReviewAdapter reviewAdapter;
     private MovieAppRoomDatabase mDb;
     private SharedPreferences sharedPreference;
+    private String currentSortOrder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -296,6 +301,29 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
             favoritePickerContainer.setVisibility(View.GONE);
         else
             toggleFavoriteOption(movieObject.isFavorite());
+
+        //Swipe Refresh Layout
+        swipeRefreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                swipeRefreshContainer.setRefreshing(false);
+
+                //set current sort order
+                setCurrentSortOrder();
+                //if the sort order is 'favorite', return
+                if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
+                    return;
+
+                //fetch trailer and review data
+                switchReviewLayoutState(STATE_EMPTY);
+                fetchApiReviewData();
+
+                switchTrailerLayoutState(STATE_EMPTY);
+                fetchApiTrailerData();
+
+            }
+        });
     }
 
     @Override
@@ -390,4 +418,11 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         }.execute();
 
     }
+
+    private void setCurrentSortOrder() {
+        currentSortOrder = sharedPreference.getString(
+                getString(R.string.pref_sort_order_key),
+                FetchApiDataUtil.TYPE_POPULAR_MOVIE);
+    }
+
 }

@@ -2,13 +2,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minHeight="@dimen/dimen_50dp"
+    android:minWidth="@dimen/dimen_50dp">
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/cl_image_loader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="@dimen/dimen_20dp">
+        android:layout_centerInParent="true">
 
         <ProgressBar
             android:id="@+id/pb_image_loader"
@@ -31,7 +33,8 @@
             app:layout_constraintLeft_toRightOf="@+id/pb_image_loader"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="@dimen/dimen_5dp" />
     </android.support.constraint.ConstraintLayout>
 
     <ImageView
