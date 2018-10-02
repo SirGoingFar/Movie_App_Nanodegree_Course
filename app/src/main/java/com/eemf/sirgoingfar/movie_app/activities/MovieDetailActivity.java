@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NavUtils;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -50,6 +52,8 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
 
     //constant
     private final int TOTAL_RATING = 10;
+    private static final String ARG_TRAILER_RECYCLERVIEW_POSITION = "arg_trailer_recyclerview_position";
+    private static final String ARG_REVIEW_RECYCLERVIEW_POSITION = "arg_review_recyclerview_position";
 
     //views
     @BindView(R.id.iv_movie_poster)
@@ -143,6 +147,47 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
                 fetchNeededData();
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+
+        if (trailerRecyclerView.isShown())
+            outState.putInt(ARG_TRAILER_RECYCLERVIEW_POSITION,
+                    ((LinearLayoutManager) trailerRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+
+        if (reviewRecyclerView.isShown())
+            outState.putInt(ARG_REVIEW_RECYCLERVIEW_POSITION,
+                    ((LinearLayoutManager) reviewRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int trailerRvPosition;
+        int reviewRvPosition;
+
+        LinearLayoutManager trailerRvLayoutManager = (LinearLayoutManager) trailerRecyclerView.getLayoutManager();
+        LinearLayoutManager reviewRvLayoutManager = (LinearLayoutManager) reviewRecyclerView.getLayoutManager();
+
+        if (trailerRecyclerView.isShown()) {
+            trailerRvPosition = savedInstanceState.getInt(ARG_TRAILER_RECYCLERVIEW_POSITION);
+
+            if (trailerRvPosition > RecyclerView.NO_POSITION && trailerRvLayoutManager != null) {
+                trailerRvLayoutManager.scrollToPosition(trailerRvPosition);
+            }
+        }
+
+        if (reviewRecyclerView.isShown()) {
+            reviewRvPosition = savedInstanceState.getInt(ARG_REVIEW_RECYCLERVIEW_POSITION);
+
+            if (reviewRvPosition > RecyclerView.NO_POSITION && reviewRvLayoutManager != null) {
+                reviewRvLayoutManager.scrollToPosition(reviewRvPosition);
+            }
+        }
     }
 
     private void fetchNeededData() {
@@ -293,14 +338,8 @@ public class MovieDetailActivity extends AppCompatActivity implements View.OnCli
         favoriteIcon.setOnClickListener(this);
         favoriteTextView.setOnClickListener(this);
 
-        //show or hide the Favorite picker
-        if (TextUtils.equals(
-                sharedPreference.getString(getString(R.string.pref_sort_order_key), FetchApiDataUtil.TYPE_POPULAR_MOVIE),
-                FetchApiDataUtil.TYPE_FAVORITE_MOVIE
-        ))
-            favoritePickerContainer.setVisibility(View.GONE);
-        else
-            toggleFavoriteOption(movieObject.isFavorite());
+        //toggle Favorite picker as needed
+        toggleFavoriteOption(movieObject.isFavorite());
 
         //Swipe Refresh Layout
         swipeRefreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

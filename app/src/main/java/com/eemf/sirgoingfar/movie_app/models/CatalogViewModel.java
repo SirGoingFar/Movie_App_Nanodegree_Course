@@ -1,7 +1,9 @@
 package com.eemf.sirgoingfar.movie_app.models;
 
+import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
+import android.support.annotation.NonNull;
 
 import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
@@ -9,15 +11,18 @@ import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
 import java.util.List;
 
 
-public class CatalogViewModel extends ViewModel {
+public class CatalogViewModel extends AndroidViewModel {
 
-    private LiveData<List<MovieEntity>> allMoviesType;
+    private LiveData<List<MovieEntity>> allMovieList;
 
-    public CatalogViewModel(MovieAppRoomDatabase mDb, String movieType) {
-        allMoviesType = mDb.getDao().loadAllMovieType(movieType);
+    public CatalogViewModel(@NonNull Application application) {
+        super(application);
+
+        MovieAppRoomDatabase mDb = MovieAppRoomDatabase.getInstance(this.getApplication());
+        allMovieList = mDb.getDao().loadAllMovie();
     }
 
-    public LiveData<List<MovieEntity>> getAllMoviesType() {
-        return allMoviesType;
+    public LiveData<List<MovieEntity>> getAllMovies() {
+        return allMovieList;
     }
 }

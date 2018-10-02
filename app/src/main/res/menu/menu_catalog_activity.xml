@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/menu_sort_order"
-        android:title="@string/keyword_settings"
+        android:title="@string/keyword_options"
         android:icon="@drawable/ic_settings_black"
         android:orderInCategory="1"
         app:showAsAction="never"/>
