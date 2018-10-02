@@ -1,10 +1,14 @@
 package com.eemf.sirgoingfar.movie_app.activities;
 
 import android.annotation.SuppressLint;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,12 +29,13 @@ import android.widget.TextView;
 
 import com.eemf.sirgoingfar.movie_app.R;
 import com.eemf.sirgoingfar.movie_app.adapters.MovieRecyclerAdapter;
-import com.eemf.sirgoingfar.movie_app.data.db.MovieAppRoomDatabase;
 import com.eemf.sirgoingfar.movie_app.data.db.MovieEntity;
+import com.eemf.sirgoingfar.movie_app.models.CatalogViewModel;
 import com.eemf.sirgoingfar.movie_app.utils.FetchApiDataUtil;
 import com.eemf.sirgoingfar.movie_app.utils.NetworkStatus;
 import com.eemf.sirgoingfar.movie_app.utils.PreferenceUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,6 +45,9 @@ import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_EMPTY;
 import static com.eemf.sirgoingfar.movie_app.utils.Constants.STATE_FILLED;
 
 public class CatalogActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    //Constant
+    private static final String ARG_MOVIE_RECYCLERVIEW_POSITION = "arg_movie_recyclerview_position";
 
     //Views
     @BindView(R.id.sr_layout)
@@ -60,7 +68,6 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     @BindView(R.id.pb_data_loader)
     ProgressBar dataLoadingProgressBar;
 
-    private MovieAppRoomDatabase mDb;
     private PreferenceUtil prefs;
     private SharedPreferences sharedPreference;
     private String currentSortOrder;
@@ -75,7 +82,6 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         ButterKnife.bind(this);
 
         //initialize the appropriate variables
-        mDb = MovieAppRoomDatabase.getInstance(this);
         prefs = PreferenceUtil.getsInstance(this);
         sharedPreference = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -87,7 +93,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
 
         //populate the screen
         if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
-            fetchFavoriteMovies();
+            fetchDataFromDb(currentSortOrder);
         else if (prefs.isApiDataPulledSuccessfully()) {
             if (doesCurrentSortOrderMovieExistInDb())
                 fetchDataFromDb(currentSortOrder);
@@ -135,8 +141,31 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
                     fetchMovieApiData(FetchApiDataUtil.TYPE_TOP_RATED_MOVIE, false);
 
             } else if (TextUtils.equals(value, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
-                fetchFavoriteMovies();
+                fetchDataFromDb(value);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+
+        outState.putInt(ARG_MOVIE_RECYCLERVIEW_POSITION,
+                ((GridLayoutManager) movieTileRecyclerView.getLayoutManager()).findFirstVisibleItemPosition());
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        GridLayoutManager movieRvLayoutManager = (GridLayoutManager) movieTileRecyclerView.getLayoutManager();
+
+        int movieRvPosition = savedInstanceState.getInt(ARG_MOVIE_RECYCLERVIEW_POSITION);
+
+        if (movieRvPosition > RecyclerView.NO_POSITION && movieRvLayoutManager != null) {
+            movieRvLayoutManager.scrollToPosition(movieRvPosition);
+        }
+
     }
 
     @Override
@@ -149,32 +178,75 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
     @SuppressLint("StaticFieldLeak")
     private void fetchDataFromDb(final String movieType) {
 
-        if (actionBar != null) {
-            actionBar.setTitle(TextUtils.equals(movieType, FetchApiDataUtil.TYPE_POPULAR_MOVIE) ?
-                    getString(R.string.pref_popular_movie_label) : getString(R.string.pref_top_rated_movie_label));
-        }
-        /*CatalogActivityViewModelFactory factory = new CatalogActivityViewModelFactory(mDb, movieType);
-        final CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this, factory).get(CatalogViewModel.class);
-        model.getAllMoviesType().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
+        setCurrentSortOrder();
+
+        setToolbarTitle(movieType);
+
+        CatalogViewModel model = ViewModelProviders.of(CatalogActivity.this).get(CatalogViewModel.class);
+        model.getAllMovies().observe(CatalogActivity.this, new Observer<List<MovieEntity>>() {
             @Override
             public void onChanged(@Nullable List<MovieEntity> movieEntities) {
-                adapter.setmMovieList((ArrayList<MovieEntity>) movieEntities);
-                switchScreen(STATE_FILLED);
+                List<MovieEntity> movieTypeList = filterAllMovieList(movieEntities);
+
+                if (!movieTypeList.isEmpty()) {
+                    adapter.setmMovieList(movieTypeList);
+                    switchScreen(STATE_FILLED);
+                } else {
+                    if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE)) {
+                        emptyStateMessageHolder.setText(getString(R.string.msg_no_favorite_movie));
+                        dataLoadingProgressBar.setVisibility(View.GONE);
+                        switchScreen(STATE_EMPTY);
+                    }
+                }
             }
-        });*/
-        new AsyncTask<Void, Void, List<MovieEntity>>() {
-            @Override
-            protected List<MovieEntity> doInBackground(Void... voids) {
-                return mDb.getDao().loadAllMovieTypeUnobserved(movieType);
+        });
+    }
+
+    private void setToolbarTitle(String movieType) {
+
+        if (actionBar != null && !TextUtils.isEmpty(movieType)) {
+
+            String title;
+
+            switch (movieType) {
+
+                case FetchApiDataUtil.TYPE_TOP_RATED_MOVIE:
+                    title = getString(R.string.pref_top_rated_movie_label);
+                    break;
+
+                case FetchApiDataUtil.TYPE_FAVORITE_MOVIE:
+                    title = getString(R.string.pref_favorite_movie_label);
+                    break;
+
+                default:
+                    title = getString(R.string.pref_popular_movie_label);
             }
 
-            @Override
-            protected void onPostExecute(List<MovieEntity> movieEntities) {
-                adapter.setmMovieList(movieEntities);
-                switchScreen(STATE_FILLED);
-            }
-        }.execute();
+            actionBar.setTitle(title);
+        }
 
+    }
+
+    private List<MovieEntity> filterAllMovieList(List<MovieEntity> movieEntities) {
+
+        setCurrentSortOrder();
+
+        List<MovieEntity> sortedList = new ArrayList<>();
+
+        for (MovieEntity movie : movieEntities) {
+
+            if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE) && movie.isFavorite())
+                sortedList.add(movie);
+            else {
+                if (TextUtils.equals(movie.getMovieType(), currentSortOrder))
+                    sortedList.add(movie);
+                else if (TextUtils.equals(movie.getMovieType(), currentSortOrder))
+                    sortedList.add(movie);
+            }
+
+        }
+
+        return sortedList;
     }
 
     private void fetchMovieApiData() {
@@ -182,7 +254,7 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
         setCurrentSortOrder();
 
         if (TextUtils.equals(currentSortOrder, FetchApiDataUtil.TYPE_FAVORITE_MOVIE))
-            fetchFavoriteMovies();
+            fetchDataFromDb(currentSortOrder);
         else
             fetchMovieApiData(currentSortOrder, false);
     }
@@ -349,36 +421,6 @@ public class CatalogActivity extends AppCompatActivity implements SharedPreferen
             noOfColumns = 2;
 
         return noOfColumns;
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private void fetchFavoriteMovies() {
-
-        switchScreen(STATE_EMPTY);
-
-        //set the toolbar title
-        if (actionBar != null) {
-            actionBar.setTitle(getString(R.string.pref_favorite_movie_label));
-        }
-
-        new AsyncTask<Void, Void, List<MovieEntity>>() {
-            @Override
-            protected List<MovieEntity> doInBackground(Void... voids) {
-                return mDb.getDao().loadAllFavoriteMovie();
-            }
-
-            @Override
-            protected void onPostExecute(List<MovieEntity> movieEntities) {
-
-                if (movieEntities.isEmpty()) {
-                    emptyStateMessageHolder.setText(getString(R.string.msg_no_favorite_movie));
-                    dataLoadingProgressBar.setVisibility(View.GONE);
-                } else {
-                    adapter.setmMovieList(movieEntities);
-                    switchScreen(STATE_FILLED);
-                }
-            }
-        }.execute();
     }
 
     private void setCurrentSortOrder() {
